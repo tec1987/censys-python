@@ -1,6 +1,6 @@
-import json, time
+import json
 import json.decoder
-import os
+import os, time
 import unittest
 
 import requests
@@ -164,11 +164,10 @@ class CensysIndex(CensysAPIBase):
         count = 0
         while page <= pages:
             t = time.time()
+            if count > 0 and t - t0 < 2.5: time.sleep(2.5 + t0 - t) # Rate Limits: api 0.4 tokens/second
+            t0 = time.time()
             payload = self._post(self.search_path, data=data)
             pages = payload['metadata']['pages']
-            rt = time.time()-t
-            print('Page=%d\tRT=%f\tSleep(%f)'%(page,rt,2.5-rt))
-            if rt < 2.5: time.sleep(2.5-rt)
             page += 1
             data["page"] = page
 
