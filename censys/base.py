@@ -1,4 +1,4 @@
-import json
+import json, time
 import json.decoder
 import os
 import unittest
@@ -163,8 +163,12 @@ class CensysIndex(CensysAPIBase):
 
         count = 0
         while page <= pages:
+            t = time.time()
             payload = self._post(self.search_path, data=data)
             pages = payload['metadata']['pages']
+            rt = time.time()-t
+            print('Page=%d\tRT=%f\tSleep(%f)'%(page,rt,2.5-rt))
+            if rt < 2.5: time.sleep(2.5-rt)
             page += 1
             data["page"] = page
 
