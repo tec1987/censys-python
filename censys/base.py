@@ -1,9 +1,4 @@
-import json
-import json.decoder
-import os, time
-import unittest
-
-import requests
+import json, json.decoder, os, time, unittest, requests
 
 
 class CensysException(Exception):
@@ -163,11 +158,15 @@ class CensysIndex(CensysAPIBase):
 
         count = 0
         while page <= pages:
+            if count > 0:
+                if tt < spt: time.sleep(spt-tt + 0.03)	# sleep based on total time
+            else: stt = time.time()
             t = time.time()
-            if count > 0 and t - t0 < 2.5: time.sleep(2.5 + t0 - t) # Rate Limits: api 0.4 tokens/second
-            t0 = time.time()
             payload = self._post(self.search_path, data=data)
             pages = payload['metadata']['pages']
+            tt = time.time() - stt
+            spt = page*2.5	# Rate Limits: api 0.4 tokens/second
+            print('Page=%d\t RTT=%f\tSleep=(%f)\tTotal=(%f) _OK'%(page, time.time()-t, spt-tt, tt))
             page += 1
             data["page"] = page
 
