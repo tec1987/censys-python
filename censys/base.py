@@ -156,17 +156,19 @@ class CensysIndex(CensysAPIBase):
             "flatten": flatten
         }
 
-        count = 0
+        count = cp = 0
         while page <= pages:
             if count > 0:
-                if tt < spt: time.sleep(spt-tt + 0.03)	# sleep based on total time
+                if time.time() < stt + cp*2.5:
+                    # print('\tST=%f\tcp=%d\tTime=%f'%(stt,cp,time.time()))
+                    print('\tSleep=(%f)'%(stt + cp*2.5 - time.time()))
+                    time.sleep(stt + cp*2.5 - time.time())	# sleep based on total time
             else: stt = time.time()
             t = time.time()
             payload = self._post(self.search_path, data=data)
             pages = payload['metadata']['pages']
-            tt = time.time() - stt
-            spt = page*2.5	# Rate Limits: api 0.4 tokens/second
-            print('Page=%d\t RTT=%f\tSleep=(%f)\tTotal=(%f) _OK'%(page, time.time()-t, spt-tt, tt))
+            print('Page=%d\t RTT=%f\tTotal=(%f) _OK'%(page, time.time()-t, time.time() - stt))
+            cp += 1
             page += 1
             data["page"] = page
 
